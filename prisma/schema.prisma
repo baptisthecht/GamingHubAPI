@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+  output = "../generated"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int               @id @default(autoincrement())
+  email           String            @unique
+  username        String            @unique
+  password        String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  points          Int
+  activities      GameActivity[]
+  temp_secret     String?
+  secret          String?
+  email_verified  Boolean           @default(false)
+}
+
+model Game {
+  id              Int               @id @default(autoincrement())
+  name            String            @unique
+  createdAt       DateTime          @default(now())
+  activities      GameActivity[]
+}
+
+model GameActivity {
+  id              Int               @id @default(autoincrement()) 
+  createdAt       DateTime          @default(now())
+  won             Boolean 
+  points          Int  
+  tries           Int               @default(0)
+  gameId          Int
+  game            Game              @relation(fields: [gameId], references: [id])  
+  playerId        Int
+  player          User              @relation(fields: [playerId], references: [id])
+}
