@@ -1,13 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 
 export class createGameActivityDto {
   @ApiProperty()
   @IsNotEmpty()
+  @IsNumber()
   readonly gameId: number;
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsNumber()
   readonly points: number;
 
   @ApiProperty()
