@@ -7,7 +7,7 @@ import { JwtStrategy } from './strategy.service';
 @Module({
   imports: [
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
+      secret: 'HEY',
     }),
   ],
   controllers: [AuthController],

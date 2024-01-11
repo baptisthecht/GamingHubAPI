@@ -27,27 +27,20 @@ export class AuthService {
   ) {}
 
   async register(registerDto: registerDto) {
-    const { email, password, username } = registerDto;
+    const { email, password, displayName } = registerDto;
     const userbyEmail = await this.prismaService.user.findUnique({
       where: { email: email },
     });
     if (userbyEmail) {
       throw new ConflictException('Email already exists');
     }
-    const userbyUsername = await this.prismaService.user.findUnique({
-      where: { username: username },
-    });
-    if (userbyUsername) {
-      throw new ConflictException('Username already exists');
-    }
     const hash = await bcrypt.hash(password, 10);
     const temp_secret = speakeasy.generateSecret();
     await this.prismaService.user.create({
       data: {
         email: email,
-        username: username,
+        displayName: displayName,
         password: hash,
-        points: 0,
         temp_secret: temp_secret.base32,
       },
     });
@@ -119,13 +112,49 @@ export class AuthService {
     const user = await this.prismaService.user.findUnique({
       where: { email: email },
       include: {
-        activities: {
+        withdrawals: {
           select: {
             id: true,
-            points: true,
-            won: true,
-            tries: true,
-            game: { select: { name: true } },
+            createdAt: true,
+            amount: true,
+            status: true,
+            RIB: true,
+          },
+        },
+
+        photos: {
+          select: {
+            id: true,
+            url: true,
+            shareLink: true,
+            createdAt: true,
+            price: true,
+            priceForSeller: true,
+            sales: true,
+            salesCount: true,
+          },
+        },
+        sales: {
+          select: {
+            id: true,
+            createdAt: true,
+            price: true,
+            priceForSeller: true,
+            photo: {
+              select: {
+                id: true,
+                url: true,
+                shareLink: true,
+                createdAt: true,
+                price: true,
+                priceForSeller: true,
+                sales: true,
+                salesCount: true,
+              },
+            },
+            buyerEmail: true,
+            buyerName: true,
+            status: true,
           },
         },
       },
@@ -142,19 +171,18 @@ export class AuthService {
       email: user.email,
     };
     const token = this.JwtService.sign(payload, {
-      expiresIn: '1d',
+      expiresIn: '365d',
       secret: this.configService.get('JWT_SECRET'),
     });
+    const fieldsToRemove = ['password', 'temp_secret', 'secret'];
+    const userWithoutSensitive = Object.fromEntries(
+      Object.entries(user).filter(([key]) => !fieldsToRemove.includes(key)),
+    );
     return {
       token,
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        points: user.points,
-        activities: user.activities,
-      },
+      user: userWithoutSensitive,
       data: 'Logged in successfully',
+      success: true,
     };
   }
 
@@ -195,7 +223,7 @@ export class AuthService {
     }
     if (!user.secret) {
       throw new ForbiddenException(
-        'You must have a verified email to reset your password',
+        'You must have a verified email adress to reset your password',
       );
     }
     const match = speakeasy.totp.verify({
@@ -214,7 +242,7 @@ export class AuthService {
       data: { password: hash },
     });
     return {
-      data: 'Password changed successfully',
+      data: 'Password updated successfully',
     };
   }
 
