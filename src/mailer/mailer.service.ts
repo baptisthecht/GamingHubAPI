@@ -4,6 +4,7 @@ import * as nodemailer from 'nodemailer';
 @Injectable()
 export class MailerService {
   private async transporter() {
+    // test email account
     const transporter = nodemailer.createTransport({
       host: 'smtp.ethereal.email',
       port: 587,
@@ -19,7 +20,7 @@ export class MailerService {
     await (
       await this.transporter()
     ).sendMail({
-      from: 'confirm-email@games.com',
+      from: 'confirm-email@unlock.me',
       to: userEmail,
       subject: 'Welcome to the app',
       html: `<h3>registered successfully, code : ${code} </h3>`,
@@ -30,7 +31,7 @@ export class MailerService {
     await (
       await this.transporter()
     ).sendMail({
-      from: 'reset-password@games.com',
+      from: 'reset-password@unlock.me',
       to: userEmail,
       subject: 'Reset your password',
       html: `<a href="${url}">Reset your password</a>
