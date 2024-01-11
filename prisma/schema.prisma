@@ -11,57 +11,32 @@ datasource db {
 model User {
   id              Int               @id @default(autoincrement())
   email           String            @unique
-  displayName     String            @default("New User")
-  bio             String?            
+  username        String            @unique
   password        String
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
-  balance         Int               @default(0)
+  points          Int
+  activities      GameActivity[]
   temp_secret     String?
   secret          String?
   email_verified  Boolean           @default(false)
-  photos          Photo[]
-  photosCount     Int               @default(0)
-  sales           Sale[]
-  salesCount      Int               @default(0)
-  withdrawals     Withdrawal[]
-  // profilePicture  String?
-  // coverPicture    String?
 }
 
-model Photo {
+model Game {
   id              Int               @id @default(autoincrement())
-  url             String
-  shareLink       String
-  price           Float
-  priceForSeller  Float             
+  name            String            @unique
   createdAt       DateTime          @default(now())
-  userId          Int
-  user            User              @relation(fields: [userId], references: [id])
-  sales           Sale[]
-  salesCount      Int               @default(0)
+  activities      GameActivity[]
 }
 
-model Sale {
-    id              Int               @id @default(autoincrement())
-    createdAt       DateTime          @default(now())
-    userId          Int
-    user            User              @relation(fields: [userId], references: [id])
-    photoId         Int
-    photo           Photo             @relation(fields: [photoId], references: [id])
-    price           Float
-    priceForSeller  Float
-    status          String            @default("pending")
-    buyerName       String
-    buyerEmail      String
-}
-
-model Withdrawal {
-    id              Int               @id @default(autoincrement())
-    createdAt       DateTime          @default(now())
-    userId          Int
-    user            User              @relation(fields: [userId], references: [id])
-    amount          Float
-    status          String            @default("pending")
-    RIB             String
+model GameActivity {
+  id              Int               @id @default(autoincrement()) 
+  createdAt       DateTime          @default(now())
+  won             Boolean 
+  points          Int  
+  tries           Int               @default(0)
+  gameId          Int
+  game            Game              @relation(fields: [gameId], references: [id])  
+  playerId        Int
+  player          User              @relation(fields: [playerId], references: [id])
 }
